@@ -1,4 +1,5 @@
 require_relative 'board'
+require_relative 'results'
 
 class Runner
   attr_reader :results
@@ -27,6 +28,6 @@ class Runner
       # Store the number of moves it took to finish the game for each run
       results << board.moves
     end
-    results
+    Results.new(results)
   end
 end
