@@ -1,3 +1,5 @@
+require 'csv'
+
 class Results
   # This class is used to store the results of running the Chutes and Ladders
   # game for the desired number of iterations.
@@ -38,5 +40,16 @@ class Results
     s = "# Iterations\t\tAverage\t\tStd. Dev.\n"
     s += "#{@results.size}\t\t\t#{avg}\t\t#{std_dev}\n\n"
     s += histogram.map { |k, v| k.to_s + "\t" + ("=" * v) }.join("\n")
+  end
+
+  # Write the histogram data to a CSV file to import to Excel
+  def histo_csv filename
+    results = histogram.map { |k, v| ["#{k}", "#{v}"] }
+    results.unshift(["", "Count"])
+    ::CSV.open(filename, "wb") do |csv|
+      results.each do |line|
+        csv << line
+      end
+    end
   end
 end
