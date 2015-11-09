@@ -1,6 +1,7 @@
 class Parser
   POSITIVE = :positive
   NEGATIVE = :negative
+  KEYWORDS = %w[awful bad boring dull effective enjoyable great hilarious]
 
   def initialize data_dir
     @data_dir = data_dir
@@ -22,16 +23,7 @@ class Parser
       next if [".", ".."].include? file
 
       contents = File.open(File.join(dir, file)).read.downcase
-      features << [
-        contents.include?("awful"),
-        contents.include?("bad"),
-        contents.include?("boring"),
-        contents.include?("dull"),
-        contents.include?("effective"),
-        contents.include?("enjoyable"),
-        contents.include?("great"),
-        contents.include?("hilarious")
-      ]
+      features << KEYWORDS.map { |w| contents.include? w }
     end
     features
   end
