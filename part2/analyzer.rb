@@ -29,6 +29,30 @@ class Analyzer
     { pos_labels: pos_labels, neg_labels: neg_labels }
   end
 
+  # Perform cross-fold validation as described in the README bundled with the
+  # data used for this analysis
+  def cross_fold_validation
+    result = { pos_labels: [], neg_labels: [] }
+    (0..9).each do |i|
+      # Get the test data
+      pos_test = @features[:pos].slice(i*100, 100)
+      neg_test = @features[:neg].slice(i*100, 100)
+
+      # Get the training data
+      pos_training = @features[:pos].take(i*100) + @features[:pos].drop(i*100 + 100)
+      neg_training = @features[:neg].take(i*100) + @features[:neg].drop(i*100 + 100)
+
+      # Compute the conditional probabilities
+      pos_probs = (0..7).map { |j| pos_training.count { |f| f[j] } / pos_training.count.to_f }
+      neg_probs = (0..7).map { |j| neg_training.count { |f| f[j] } / neg_training.count.to_f }
+
+      # Label the test data
+      result[:pos_labels] += pos_test.map { |f| label(f, pos_probs, neg_probs) }
+      result[:neg_labels] += neg_test.map { |f| label(f, pos_probs, neg_probs) }
+    end
+    result
+  end
+
   # Compute the accuracy of the given labeling with respect to the known
   # classification of the reviews
   def accuracy labels

@@ -15,6 +15,14 @@ def display_results analyzer
   result[:confusion].each do |r|
     puts r.join("\t")
   end
+
+  puts "\nResult of cross-fold validation:"
+  result = analyzer.accuracy(analyzer.cross_fold_validation)
+  puts "\nClassifier accuracy: " + result[:accuracy].to_s
+  puts "\nConfusion matrix:"
+  result[:confusion].each do |r|
+    puts r.join("\t")
+  end
 end
 
 if __FILE__ == $0
