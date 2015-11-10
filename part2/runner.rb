@@ -23,6 +23,13 @@ def display_results analyzer
   result[:confusion].each do |r|
     puts r.join("\t")
   end
+
+  puts "\nRandom Reviews:"
+  reviews = analyzer.generate_reviews
+  puts "\nPositive:"
+  reviews[:pos].each { |r| puts r.empty? ? "<Blank Review Generated>" : r }
+  puts "\nNegative:"
+  reviews[:neg].each { |r| puts r.empty? ? "<Blank Review Generated>" : r }
 end
 
 if __FILE__ == $0

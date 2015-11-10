@@ -1,4 +1,5 @@
 require_relative 'parser'
+require_relative '../part1/distsampler'
 
 class Analyzer
   def initialize features
@@ -14,6 +15,37 @@ class Analyzer
     # reviews for that polarity
     count = @features[polarity].count.to_f
     (0..7).map { |i| @features[polarity].count { |f| f[i] } / count }
+  end
+
+  # Generate random reviews consisting only of the keywords provided by using
+  # the computed probabilities to generate new feature vectors
+  def generate_reviews
+    pos_probs = cond_probs(:pos)
+    neg_probs = cond_probs(:neg)
+    reviews = { pos: [], neg: [] }
+
+    5.times do
+      reviews[:pos] << generate_feature_vector(pos_probs)
+      reviews[:neg] << generate_feature_vector(neg_probs)
+    end
+    reviews[:pos].map! { |f| convert(f) }
+    reviews[:neg].map! { |f| convert(f) }
+    reviews
+  end
+
+  # Converts a feature vector into a readable "review" by transforming each
+  # entry into the corresponding keyword it represents
+  def convert feature
+    Parser::KEYWORDS.each_with_index.map do |keyword, i|
+      feature[i] ? keyword : nil
+    end.compact.join(" ")
+  end
+
+  # Generate a random feature vector using the provided probabilities
+  def generate_feature_vector probs
+    (0..7).map do |i|
+      ::DistSampler.new({ true => probs[i], false => (1 - probs[i]) }).sample
+    end
   end
 
   # Add class labels using the Naive Bayes classifier method, using the entire
