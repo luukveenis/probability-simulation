@@ -1,30 +1,29 @@
 class Parser
-  POSITIVE = :positive
-  NEGATIVE = :negative
   KEYWORDS = %w[awful bad boring dull effective enjoyable great hilarious]
 
   def initialize data_dir
     @data_dir = data_dir
   end
 
-  # Returns the set of feature vectors corresponding to the directory with
-  # reviews for the desired polarity
-  def features polarity
-    # Check for invalid input
-    raise "Invalid polarity" unless [POSITIVE, NEGATIVE].include? polarity
+  # Returns a hash containing the sets of feature vectors for both the
+  # positive and negative review directories
+  def features
+    result = Hash.new([])
 
-    # Figure out which folder to search
-    features = []
-    dir = polarity == POSITIVE ? "pos" : "neg"
-    dir = File.join(@data_dir, dir)
+    # Read boh polarity directories
+    [:pos, :neg].each do |polarity|
+      dir = File.join(@data_dir, polarity.to_s)
+      feats = []
 
-    # Read each file in the folder and compute the feature vector
-    Dir.foreach(dir) do |file|
-      next if [".", ".."].include? file
+      # Read each file in the folder and compute the feature vector
+      Dir.foreach(dir) do |file|
+        next if [".", ".."].include? file
 
-      contents = File.open(File.join(dir, file)).read.downcase
-      features << KEYWORDS.map { |w| contents.include? w }
+        contents = File.open(File.join(dir, file)).read.downcase
+        feats << KEYWORDS.map { |w| contents.include? w }
+      end
+      result[polarity] = feats
     end
-    features
+    result
   end
 end
