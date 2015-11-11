@@ -11,17 +11,34 @@ class Sampler
     @goal = goal
   end
 
-  # Perform direct sampling on the BN the specified amount of times
-  def direct_sampling
+  # Perform both types of sampling on the BN with increasing sample sizes
+  def run
     iters = 0
-    results = []
+    results = { direct: [], rejection: [] }
     while iters <= @max_iters
       samples = []
       iters.times { samples << direct_sample }
-      results << [iters, (samples.count { |s| s == @goal } / samples.size.to_f)]
+      results[:direct] << [iters, approx_inference(samples)]
+      results[:rejection] << [iters, rejection_sample(samples)]
       iters += @step
     end
     results
+  end
+
+  # Perform approximate inference on the samples:
+  # Divide the number of samples that match the specified assignment by the
+  # total number of samples.
+  def approx_inference samples
+    samples.count { |s| s == @goal } / samples.size.to_f
+  end
+
+  # Perform rejection sampling on the samples:
+  # Divide the number of samples where flu is true, cough is true, and wheezing
+  # is false by those where simply cough is true and wheezing is false.
+  def rejection_sample samples
+    num = samples.count { |s| s[0] && s[5] && !s[6] }
+    denom = samples.count { |s| s[5] && !s[6] }
+    num / denom.to_f
   end
 
   # Data must be a 2D array, where each line corresponds to a row in the CSV
